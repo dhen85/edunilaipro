@@ -6,7 +6,7 @@
     <title>Sistem Katrol & Pengelola Nilai Otomatis</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" xintegrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -340,10 +340,11 @@
                     </div>
                 </div>
 
+                <!-- MENU PENGATURAN -->
                 <div id="view-settings" class="hidden fade-in space-y-6 max-w-2xl flex-grow">
                     <h1 class="text-2xl font-bold text-slate-800">Pengaturan Parameter & Identitas</h1>
                     
-                    <!-- Form Identitas Sekolah Baru -->
+                    <!-- Form Identitas Sekolah -->
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-6">
                         <h2 class="font-semibold text-lg border-b border-slate-100 pb-2 text-slate-800"><i class="fa-solid fa-school text-brand-500 mr-2"></i>Identitas Sekolah</h2>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -365,7 +366,7 @@
                         </div>
                     </div>
 
-                    <!-- Form Parameter Katrol yang sudah ada -->
+                    <!-- Form Parameter Katrol -->
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-6">
                         <h2 class="font-semibold text-lg border-b border-slate-100 pb-2 text-slate-800"><i class="fa-solid fa-sliders text-brand-500 mr-2"></i>Parameter Katrol Linier</h2>
                         <div class="p-4 bg-brand-50 text-brand-900 rounded-lg border border-brand-200 text-sm">
@@ -415,7 +416,6 @@
         // ==========================================
         // 1. KONFIGURASI FIREBASE
         // ==========================================
-        // PENTING: Ganti nilai didalam fallback JSON ini dengan Config dari Firebase Console Anda saat Deploy di Github
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
             apiKey: "AIzaSyCNBz2xijeruPPLAyXvgNA1xEKZmcO9F9g",
             authDomain: "edunilai-pro.firebaseapp.com",
@@ -448,7 +448,7 @@
                 },
                 guru: {
                     nama: "DANAR WULAN, S.Si.",
-                    nip: "19850815 201708 1 001",
+                    nip: "19850815 201708 1001",
                     mapel: "ILMU PENGETAHUAN ALAM",
                     tapel: "2025/2026"
                 }
@@ -464,7 +464,6 @@
             grades: {} 
         };
 
-        // Di-expose ke window agar bisa diakses HTML onclick dan diisi dengan kerangka awal
         window.appData = JSON.parse(JSON.stringify(defaultAppData)); 
 
         // Fungsi Global untuk Mengupdate Identitas di semua layar (Login, Header, dll)
@@ -495,7 +494,6 @@
             }
         };
 
-        // Langsung panggil saat file dimuat agar tampilan default login merespon
         window.updateIdentitasUI();
 
         // ==========================================
@@ -581,7 +579,6 @@
                 window.showToast('Berhasil masuk ke EduNilai Pro!');
             } else {
                 currentUser = null;
-                // Saat logout kembalikan setting sementara ke default agar aman
                 window.appData = JSON.parse(JSON.stringify(defaultAppData));
                 window.updateIdentitasUI();
 
@@ -619,7 +616,6 @@
                 
                 if (docSnap.exists()) {
                     window.appData = docSnap.data();
-                    // Backward compatibility (Jika user lama belum punya objek "sekolah")
                     if(!window.appData.settings.sekolah) {
                         window.appData.settings.sekolah = defaultAppData.settings.sekolah;
                     }
@@ -627,12 +623,10 @@
                         window.appData.settings.guru = defaultAppData.settings.guru;
                     }
                 } else {
-                    // Jika user baru, buat kerangka data baru dari default
                     window.appData = JSON.parse(JSON.stringify(defaultAppData));
                     await saveToCloud(true);
                 }
 
-                // Terapkan UI Settings & Identitas
                 document.getElementById('set-kkm').value = window.appData.settings.kkm;
                 document.getElementById('set-min').value = window.appData.settings.targetMin;
                 document.getElementById('set-max').value = window.appData.settings.targetMax;
@@ -683,7 +677,6 @@
             if(tabName === 'rekap') window.renderRekap();
         };
 
-        // ... Sisa fungsi HTML UI dipindahkan ke format window ...
         function initGradesForStudent(studentId) {
             if(!window.appData.grades[studentId]) window.appData.grades[studentId] = {};
             Object.keys(window.appData.kategori).forEach(kat => {
@@ -739,7 +732,7 @@
             input.value = '';
             window.renderDaftarItemPenilaian();
             window.populateKategoriDropdown();
-            await window.saveToCloud(); // Save to DB
+            await window.saveToCloud(); 
         };
 
         window.hapusItemPenilaian = async (kat, idx) => {
@@ -835,7 +828,7 @@
         };
 
         window.downloadTemplate = () => { alert("Pastikan script library Sheet.js terbaca dengan sempurna."); };
-        window.importSiswa = (event) => { /* Logika sheet import tetap sama, jangan lupa saveToCloud setelah selesai */ };
+        window.importSiswa = (event) => { /* Logika sheet import */ };
 
         window.populateKategoriDropdown = () => {
             const selKategori = document.getElementById('input-kategori');
@@ -897,8 +890,6 @@
             let num = parseFloat(val) || 0;
             window.appData.grades[id][kat][item][field] = num;
             if(kat !== "Sumatif Lingkup Materi" && field === 'asli') window.appData.grades[id][kat][item]['katrol'] = num;
-            // Kita tidak autosave disini agar firebase tidak terbebani. 
-            // Harus tekan tombol "Simpan ke Cloud"
         };
 
         window.terapkanRumusKatrol = () => {
@@ -928,6 +919,7 @@
         };
 
         window.simpanNilai = async () => { await window.saveToCloud(); };
+        
         window.simpanPengaturan = async () => {
             // Parameter Katrol
             window.appData.settings.kkm = parseFloat(document.getElementById('set-kkm').value)||0;
@@ -950,18 +942,16 @@
                 tapel: document.getElementById('set-guru-tapel').value.trim()
             };
             
-            window.updateIdentitasUI(); // Update DOM saat tersimpan
+            window.updateIdentitasUI(); 
             await window.saveToCloud();
         };
 
-        window.renderRekap = () => { /* Logika merender tabel nilai rekap ada disini (dipersingkat agar muat) */
-            // Konsep render sama persis dengan kode Anda sebelumnya
+        window.renderRekap = () => { 
             const kelas = document.getElementById('rekap-kelas').value;
             const tbody = document.getElementById('rekap-table-body');
             const thead = document.getElementById('rekap-table-head');
             let stds = window.appData.students.filter(s => s.kelas === kelas);
             
-            // Generate Headers...
             let tpList = window.appData.kategori["Sumatif Lingkup Materi"];
             let headHtml = `<tr>
                 <th rowspan="2" class="p-2 border bg-slate-100 sticky-col-header text-center">No</th>
@@ -978,7 +968,6 @@
             <th class="p-2 border bg-rose-50/50 text-[10px] text-center">SAS A</th><th class="p-2 border bg-emerald-50/50 text-[10px] text-center">SAS K</th></tr>`;
             thead.innerHTML = headHtml;
 
-            // Generate Body...
             tbody.innerHTML = '';
             if(stds.length === 0) { tbody.innerHTML=`<tr><td colspan="30" class="p-4 text-center">Belum ada data.</td></tr>`; return;}
             const thSikap = window.appData.settings.predikat;
@@ -1026,15 +1015,13 @@
             
             showLoading(true, 'Menyiapkan Dokumen PDF...');
 
-            // Ambil data Identitas Sekolah dari pengaturan (atau defaults)
+            // Ambil data Identitas Sekolah & Guru
             const sek = window.appData.settings.sekolah || defaultAppData.settings.sekolah;
             const guru = window.appData.settings.guru || defaultAppData.settings.guru;
 
-            // 1. Ambil HTML dari tabel rekap
             const theadHTML = document.getElementById('rekap-table-head').innerHTML;
             const tbodyHTML = document.getElementById('rekap-table-body').innerHTML;
 
-            // 2. Bersihkan styling Tailwind yang mengganggu format cetak hitam putih
             const cleanThead = theadHTML.replace(/class="[^"]*"/g, '');
             const cleanTbody = tbodyHTML.replace(/class="[^"]*"/g, '');
 
@@ -1043,7 +1030,7 @@
             container.style.fontFamily = '"Times New Roman", Times, serif';
             container.style.color = '#000';
             
-            // 3. Bangun Struktur HTML khusus cetak dengan Kop Resmi dan Data Dinamis Identitas
+            // 3. Bangun Struktur HTML PDF 
             container.innerHTML = `
                 <div style="text-align: center; margin-bottom: 20px;">
                     <h2 style="margin: 0; font-size: 16px; font-weight: bold; text-transform: uppercase;">DINAS PENDIDIKAN PEMUDA DAN OLAHRAGA</h2>
@@ -1081,21 +1068,24 @@
                     </tbody>
                 </table>
                 
-                <div style="margin-top: 40px; font-size: 11px; display: flex; justify-content: space-between; font-family: Arial, sans-serif;">
-                    <div style="text-align: center; width: 250px;">
-                        <p style="margin: 0 0 60px 0;">Mengetahui,<br>Kepala Sekolah</p>
-                        <p style="margin: 0; font-weight: bold; text-decoration: underline;">${sek.kepsek}</p>
-                        <p style="margin: 0;">NIP. ${sek.nip}</p>
-                    </div>
-                    <div style="text-align: center; width: 250px;">
-                        <p style="margin: 0 0 60px 0;"><br>Guru Mata Pelajaran</p>
-                        <p style="margin: 0; font-weight: bold; text-decoration: underline;">${guru.nama}</p>
-                        <p style="margin: 0;">NIP. ${guru.nip}</p>
-                    </div>
-                </div>
+                <!-- TANDA TANGAN DIBUAT DENGAN TABEL STATIS AGAR HTML2PDF MEMBACA DENGAN RAPI -->
+                <table style="width: 100%; margin-top: 40px; font-size: 11px; font-family: Arial, sans-serif; text-align: center; border: none;">
+                    <tr>
+                        <td style="width: 50%; padding-bottom: 60px;">Mengetahui,<br>Kepala Sekolah</td>
+                        <td style="width: 50%; padding-bottom: 60px;"><br>Guru Mata Pelajaran</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: bold; text-decoration: underline;">${sek.kepsek}</td>
+                        <td style="font-weight: bold; text-decoration: underline;">${guru.nama}</td>
+                    </tr>
+                    <tr>
+                        <td>NIP. ${sek.nip}</td>
+                        <td>NIP. ${guru.nip}</td>
+                    </tr>
+                </table>
             `;
 
-            // 4. Pastikan border tabel tergambar jelas dan rata kiri untuk kolom Nama
+            // Border Styling 
             const cells = container.querySelectorAll('#pdf-table th, #pdf-table td');
             cells.forEach(cell => {
                 cell.style.border = '1px solid black';
@@ -1110,16 +1100,16 @@
                 }
             });
 
-            // 5. Opsi konversi PDF (A4 - Landscape)
+            // Opsi konversi PDF
             const opt = {
                 margin:       10,
                 filename:     'Rekap_Nilai_' + kelas.replace(/ /g, '_') + '.pdf',
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 }, // kualitas ketajaman cetak
+                html2canvas:  { scale: 2 }, 
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
             };
 
-            // 6. Eksekusi PDF Download
+            // Eksekusi Download
             try {
                 await html2pdf().set(opt).from(container).save();
                 window.showToast('File PDF berhasil disimpan!');
