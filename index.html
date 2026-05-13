@@ -432,12 +432,12 @@
         // 1. KONFIGURASI FIREBASE
         // ==========================================
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            apiKey: "AIzaSyCNBz2xijeruPPLAyXvgNA1xEKZmcO9F9g",
-            authDomain: "edunilai-pro.firebaseapp.com",
-            projectId: "edunilai-pro",
-            storageBucket: "edunilai-pro.firebasestorage.app",
-            messagingSenderId: "728792492427",
-            appId: "1:728792492427:web:ea1d75e62f314ab837a78e"
+            apiKey: "API_KEY_FIREBASE_ANDA",
+            authDomain: "NAMA_PROJECT.firebaseapp.com",
+            projectId: "NAMA_PROJECT",
+            storageBucket: "NAMA_PROJECT.firebasestorage.app",
+            messagingSenderId: "SENDER_ID",
+            appId: "APP_ID"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -457,15 +457,15 @@
             settings: { 
                 kkm: 75, targetMin: 76, targetMax: 95, predikat: { A: 90, B: 80, C: 70 },
                 sekolah: {
-                    nama: "SMP NEGERI 2 ENDE",
-                    alamat: "Jl. Kelimutu, Kel. Onekore, Kec. Ende Tengah, Kab. Ende",
-                    kepsek: "Marcelinus Ricardus Rango, S.Pd.",
-                    nip: "19680707 200502 1 003"
+                    nama: "SEKOLAH PENGGERAK INDONESIA",
+                    alamat: "Jl. Pendidikan Nasional No. 1, Kota Pelajar, Provinsi Ilmu, Kode Pos 12345",
+                    kepsek: "NAMA KEPALA SEKOLAH, M.Pd.",
+                    nip: "19800101 200501 1 001"
                 },
                 guru: {
-                    nama: "DANAR WULAN, S.Si.",
-                    nip: "19850815 201708 1001",
-                    mapel: "ILMU PENGETAHUAN ALAM",
+                    nama: "NAMA GURU, S.Pd.",
+                    nip: "19850202 201001 2 003",
+                    mapel: "Mata Pelajaran",
                     tapel: "2025/2026"
                 }
             },
@@ -1233,7 +1233,7 @@
                 window.showToast('File PDF berhasil disimpan!');
             } catch(e) {
                 console.error(e);
-                alert('Terjadi kesalahan saat memproses PDF.');
+                window.showCustomAlert('Kesalahan', 'Terjadi kesalahan saat memproses file PDF.', 'fa-triangle-exclamation', 'text-red-500', 'bg-red-100');
             }
             
             showLoading(false);
