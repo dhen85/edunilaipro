@@ -83,7 +83,7 @@
                     </div>
                     <div class="flex-grow flex flex-col justify-center max-w-sm mx-auto w-full">
                         <h2 class="text-4xl font-extrabold text-center text-slate-800 mb-8 leading-tight">Masuk ke<br>akun</h2>
-                        <div class="space-y-5">
+                        <div class="space-y-4">
                             <div>
                                 <input type="email" id="login-user" placeholder="Alamat Email" class="w-full px-6 py-4 rounded-full border border-slate-200 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 text-sm bg-slate-50 font-medium text-slate-700 transition">
                             </div>
@@ -93,11 +93,18 @@
                             </div>
                             <p id="login-error" class="hidden text-red-500 text-sm text-center font-medium mt-1 transition-all">User dan kata sandi kurang tepat. Coba masukan lagi.</p>
                             
-                            <button onclick="doLogin()" class="w-full bg-brand-500 hover:bg-brand-600 text-brand-900 font-bold rounded-full py-4 transition mt-4 shadow-md shadow-brand-500/30 text-[15px]">
+                            <button onclick="doLogin()" class="w-full bg-brand-500 hover:bg-brand-600 text-brand-900 font-bold rounded-full py-4 transition shadow-md shadow-brand-500/30 text-[15px]">
                                 Masuk ke aplikasi
                             </button>
                         </div>
-                        <p class="text-sm text-center text-slate-500 mt-6 font-medium">Belum punya akun? <button onclick="toggleAuthView('signup')" class="text-brand-600 font-bold hover:underline">Daftar sekarang</button></p>
+                        <p class="text-sm text-center text-slate-500 mt-4 font-medium">Belum punya akun? <button onclick="toggleAuthView('signup')" class="text-brand-600 font-bold hover:underline">Daftar sekarang</button></p>
+                        
+                        <!-- TOMBOL MODE DEMO -->
+                        <div class="mt-4 pt-4 border-t border-slate-100">
+                            <button onclick="doDemo()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-full py-3 transition shadow-sm text-sm border border-slate-200">
+                                <i class="fa-solid fa-flask mr-2"></i> Coba Mode Demo (Tanpa Login)
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -138,11 +145,18 @@
                             </div>
                             <p id="signup-error" class="hidden text-red-500 text-sm text-center font-medium mt-1 transition-all"></p>
                             
-                            <button onclick="doSignup()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-full py-4 transition mt-4 shadow-md text-[15px]">
+                            <button onclick="doSignup()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-full py-4 transition shadow-md text-[15px]">
                                 Daftarkan Akun
                             </button>
                         </div>
-                        <p class="text-sm text-center text-slate-500 mt-6 font-medium">Sudah punya akun? <button onclick="toggleAuthView('login')" class="text-brand-600 font-bold hover:underline">Masuk di sini</button></p>
+                        <p class="text-sm text-center text-slate-500 mt-4 font-medium">Sudah punya akun? <button onclick="toggleAuthView('login')" class="text-brand-600 font-bold hover:underline">Masuk di sini</button></p>
+                        
+                        <!-- TOMBOL MODE DEMO -->
+                        <div class="mt-4 pt-4 border-t border-slate-100">
+                            <button onclick="doDemo()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-full py-3 transition shadow-sm text-sm border border-slate-200">
+                                <i class="fa-solid fa-flask mr-2"></i> Coba Mode Demo (Tanpa Login)
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -161,7 +175,8 @@
                 </div>
             </div>
             <div class="hidden md:flex ml-auto pl-4 border-l border-slate-200 items-center mr-4">
-                <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider"><i class="fa-solid fa-cloud mr-1"></i> Cloud Sync Aktif</span>
+                <!-- Tambahkan ID ke badge agar bisa diubah saat Mode Demo -->
+                <span id="cloud-badge" class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider"><i class="fa-solid fa-cloud mr-1"></i> Cloud Sync Aktif</span>
             </div>
             <button class="md:hidden ml-auto text-slate-500 hover:text-brand-600" onclick="document.getElementById('sidebar').classList.toggle('hidden')">
                 <i class="fa-solid fa-bars text-xl"></i>
@@ -380,7 +395,7 @@
                             </div>
                         </div>
                         <div class="pt-4 border-t border-slate-200 flex justify-end">
-                            <button onclick="simpanPengaturan()" class="bg-brand-500 hover:bg-brand-600 text-brand-900 px-6 py-2 rounded-lg font-bold shadow-sm transition"><i class="fa-solid fa-check mr-2"></i>Simpan Pengaturan</button>
+                            <button id="btn-simpan-pengaturan" onclick="simpanPengaturan()" class="bg-brand-500 hover:bg-brand-600 text-brand-900 px-6 py-2 rounded-lg font-bold shadow-sm transition"><i class="fa-solid fa-check mr-2"></i>Simpan Pengaturan</button>
                         </div>
                     </div>
                 </div>
@@ -433,6 +448,7 @@
         let currentUser = null;
         let myChart = null;
         let studentToDeleteId = null;
+        let isDemoMode = false; // Flag untuk mode uji coba (offline)
 
         // ==========================================
         // 2. STATE DEFAULT APLIKASI
@@ -557,14 +573,89 @@
             showLoading(false);
         };
 
-        window.logout = async () => {
-            await signOut(auth);
+        // Fungsi Kunci & Buka Restriksi Pengaturan di Mode Demo
+        function applyDemoRestrictions() {
+            const inputs = document.querySelectorAll('#view-settings input');
+            inputs.forEach(input => {
+                input.disabled = true;
+                input.classList.add('bg-slate-200', 'cursor-not-allowed', 'opacity-70');
+            });
+            
+            const btnSimpan = document.getElementById('btn-simpan-pengaturan');
+            if(btnSimpan) btnSimpan.style.display = 'none';
+
+            const title = document.querySelector('#view-settings h1');
+            if(title && !document.getElementById('demo-warning-settings')) {
+                title.insertAdjacentHTML('afterend', '<div id="demo-warning-settings" class="bg-amber-100 text-amber-800 p-4 rounded-lg text-sm font-medium mb-4 shadow-sm"><i class="fa-solid fa-lock mr-2"></i>Dalam Mode Demo, Pengaturan Parameter dan Identitas dikunci (Hanya Baca).</div>');
+            }
+        }
+
+        function removeDemoRestrictions() {
+            const inputs = document.querySelectorAll('#view-settings input');
+            inputs.forEach(input => {
+                input.disabled = false;
+                input.classList.remove('bg-slate-200', 'cursor-not-allowed', 'opacity-70');
+            });
+            
+            const btnSimpan = document.getElementById('btn-simpan-pengaturan');
+            if(btnSimpan) btnSimpan.style.display = 'inline-flex';
+
+            const warning = document.getElementById('demo-warning-settings');
+            if (warning) warning.remove();
+        }
+
+        // Fungsi khusus Mode Demo
+        window.doDemo = () => {
+            isDemoMode = true;
+            document.getElementById('view-login').style.display = 'none';
+            document.getElementById('view-signup').style.display = 'none';
+            
+            // Muat data awal yang kosong dan aman
+            window.appData = JSON.parse(JSON.stringify(defaultAppData));
+            
+            // Terapkan identitas dan Dropdown
+            window.updateIdentitasUI();
+            window.populateClassDropdowns();
+            window.populateKategoriDropdown();
+
+            // Ubah lencana indikator status cloud
+            const badge = document.getElementById('cloud-badge');
+            if(badge) {
+                badge.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-1"></i> Mode Demo (Offline)';
+                badge.className = 'bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider';
+            }
+
+            // Kunci Pengaturan
+            applyDemoRestrictions();
+
+            // Buka Aplikasi
+            document.getElementById('app-container').classList.remove('hidden');
+            document.getElementById('app-container').classList.add('flex');
+            
+            window.switchTab('dashboard');
+            window.showToast('Berhasil masuk Mode Uji Coba (Tanpa Simpan)');
         };
 
-        // Listener Status User
+        window.logout = async () => {
+            try {
+                await signOut(auth);
+            } catch(e) {}
+            window.location.reload();
+        };
+
+        // Listener Status User (Firebase)
         onAuthStateChanged(auth, async (user) => {
             if (user) {
+                isDemoMode = false;
                 currentUser = user;
+                
+                // Pastikan lencana cloud sync kembali normal jika habis dari mode demo
+                const badge = document.getElementById('cloud-badge');
+                if(badge) {
+                    badge.innerHTML = '<i class="fa-solid fa-cloud mr-1"></i> Cloud Sync Aktif';
+                    badge.className = 'bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider';
+                }
+
                 document.getElementById('view-login').style.display = 'none';
                 document.getElementById('view-signup').style.display = 'none';
                 
@@ -572,19 +663,24 @@
                 await fetchCloudData();
                 showLoading(false);
 
-                document.getElementById('app-container').classList.remove('hidden');
-                document.getElementById('app-container').classList.add('flex');
-                
-                window.switchTab('dashboard');
-                window.showToast('Berhasil masuk ke EduNilai Pro!');
+                // Cek jika fetchCloudData tidak melempar user ke mode demo, maka lanjut buka aplikasi
+                if (!isDemoMode) {
+                    document.getElementById('app-container').classList.remove('hidden');
+                    document.getElementById('app-container').classList.add('flex');
+                    
+                    window.switchTab('dashboard');
+                    window.showToast('Berhasil masuk ke EduNilai Pro!');
+                }
             } else {
                 currentUser = null;
+                isDemoMode = false;
                 window.appData = JSON.parse(JSON.stringify(defaultAppData));
                 window.updateIdentitasUI();
 
                 document.getElementById('app-container').classList.add('hidden');
                 document.getElementById('app-container').classList.remove('flex');
                 document.getElementById('view-login').style.display = 'flex';
+                document.getElementById('view-signup').style.display = 'none';
             }
         });
 
@@ -609,13 +705,17 @@
         }
 
         async function fetchCloudData() {
-            if (!currentUser) return;
+            if (!currentUser || isDemoMode) return;
             try {
                 const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'appData', 'main');
                 const docSnap = await getDoc(docRef);
                 
+                let userStatus = 'pending';
+
                 if (docSnap.exists()) {
                     window.appData = docSnap.data();
+                    userStatus = window.appData.status || 'pending';
+                    
                     if(!window.appData.settings.sekolah) {
                         window.appData.settings.sekolah = defaultAppData.settings.sekolah;
                     }
@@ -624,8 +724,20 @@
                     }
                 } else {
                     window.appData = JSON.parse(JSON.stringify(defaultAppData));
+                    window.appData.status = 'pending'; // Set user baru sebagai pending
+                    userStatus = 'pending';
                     await saveToCloud(true);
                 }
+
+                // Cek Persetujuan Admin
+                if (userStatus !== 'approved') {
+                    alert("INFORMASI AKUN:\\n\\nAkun Anda saat ini berstatus [Menunggu Persetujuan Admin].\\n\\nUntuk sementara, Anda akan dialihkan ke Mode Demo. Harap hubungi Admin agar akun Anda dapat beroperasi secara penuh.");
+                    window.doDemo();
+                    return; // Stop proses normal
+                }
+
+                // Buka restriksi jika lolos (approved)
+                removeDemoRestrictions();
 
                 document.getElementById('set-kkm').value = window.appData.settings.kkm;
                 document.getElementById('set-min').value = window.appData.settings.targetMin;
@@ -644,6 +756,12 @@
         }
 
         window.saveToCloud = async (silent = false) => {
+            // JIKA SEDANG MODE DEMO, HENTIKAN PROSES PENYIMPANAN KE CLOUD
+            if (isDemoMode) {
+                if(!silent) window.showToast('Data tersimpan secara lokal (Mode Demo)');
+                return;
+            }
+
             if (!currentUser) return;
             if(!silent) showLoading(true, "Menyimpan ke Cloud...");
             try {
