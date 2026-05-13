@@ -417,6 +417,18 @@
         </div>
     </div>
 
+    <!-- Modal Custom Alert Pro -->
+    <div id="custom-alert-modal" class="hidden fixed inset-0 bg-slate-900/60 z-[110] flex items-center justify-center fade-in backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-xl p-8 max-w-sm w-full mx-4 border border-slate-100 flex flex-col items-center">
+            <div id="custom-alert-icon-wrapper" class="flex items-center justify-center w-16 h-16 rounded-full mx-auto mb-5 bg-amber-100 text-amber-500">
+                <i id="custom-alert-icon" class="fa-solid fa-circle-exclamation text-3xl"></i>
+            </div>
+            <h3 id="custom-alert-title" class="text-xl font-bold text-center text-slate-800 mb-2">Peringatan</h3>
+            <p id="custom-alert-msg" class="text-slate-500 text-center leading-relaxed mb-6 text-sm"></p>
+            <button id="custom-alert-btn" class="px-8 py-3 bg-brand-500 hover:bg-brand-600 text-brand-900 rounded-full text-sm font-bold shadow-md transition-all w-full">Oke, Mengerti</button>
+        </div>
+    </div>
+
     <div id="toast" class="fixed bottom-5 right-5 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-800 text-white px-4 py-3 rounded-lg shadow-lg flex items-center z-[60]">
         <i class="fa-solid fa-circle-check text-emerald-400 mr-3"></i>
         <span id="toast-msg">Sukses!</span>
@@ -481,6 +493,25 @@
         };
 
         window.appData = JSON.parse(JSON.stringify(defaultAppData)); 
+
+        // Fungsi Custom Alert Modal Profesional
+        window.showCustomAlert = (title, msg, iconClass = 'fa-circle-exclamation', iconColorClass = 'text-amber-500', bgColorClass = 'bg-amber-100', callback = null) => {
+            document.getElementById('custom-alert-title').innerText = title;
+            document.getElementById('custom-alert-msg').innerHTML = msg;
+            
+            const iconWrapper = document.getElementById('custom-alert-icon-wrapper');
+            iconWrapper.className = `flex items-center justify-center w-16 h-16 rounded-full mx-auto mb-5 ${bgColorClass} ${iconColorClass}`;
+            document.getElementById('custom-alert-icon').className = `fa-solid ${iconClass} text-3xl`;
+
+            const modal = document.getElementById('custom-alert-modal');
+            modal.classList.remove('hidden');
+
+            const btn = document.getElementById('custom-alert-btn');
+            btn.onclick = () => {
+                modal.classList.add('hidden');
+                if (callback) callback();
+            };
+        };
 
         // Fungsi Global untuk Mengupdate Identitas di semua layar (Login, Header, dll)
         window.updateIdentitasUI = () => {
@@ -729,10 +760,19 @@
                     await saveToCloud(true);
                 }
 
-                // Cek Persetujuan Admin
+                // Cek Persetujuan Admin (Memanggil Custom Modal Pro)
                 if (userStatus !== 'approved') {
-                    alert("INFORMASI AKUN:\\n\\nAkun Anda saat ini berstatus [Menunggu Persetujuan Admin].\\n\\nUntuk sementara, Anda akan dialihkan ke Mode Demo. Harap hubungi Admin agar akun Anda dapat beroperasi secara penuh.");
-                    window.doDemo();
+                    isDemoMode = true; // Set flag secara dini
+                    window.showCustomAlert(
+                        "Informasi Akun", 
+                        "Akun Anda saat ini berstatus <strong>[Menunggu Persetujuan Admin]</strong>.<br><br>Untuk sementara, Anda akan dialihkan ke Mode Demo. Harap hubungi Admin agar akun Anda dapat beroperasi secara penuh.", 
+                        "fa-user-clock", 
+                        "text-blue-500", 
+                        "bg-blue-100", 
+                        () => {
+                            window.doDemo();
+                        }
+                    );
                     return; // Stop proses normal
                 }
 
@@ -751,7 +791,7 @@
                 window.populateKategoriDropdown();
             } catch (e) {
                 console.error("Gagal sinkron database:", e);
-                alert("Koneksi Database bermasalah. Pastikan rules diatur dengan benar.");
+                window.showCustomAlert('Koneksi Gagal', 'Koneksi Database bermasalah. Pastikan rules diatur dengan benar.', 'fa-triangle-exclamation', 'text-red-500', 'bg-red-100');
             }
         }
 
@@ -770,7 +810,7 @@
                 if(!silent) window.showToast('Tersimpan di Cloud!');
             } catch (e) {
                 console.error("Error saving:", e);
-                if(!silent) alert("Gagal menyimpan ke Cloud!");
+                if(!silent) window.showCustomAlert('Gagal Menyimpan', 'Gagal menyimpan ke Cloud! Periksa koneksi internet Anda.', 'fa-xmark', 'text-red-500', 'bg-red-100');
             }
             if(!silent) showLoading(false);
         };
@@ -945,7 +985,7 @@
             }
         };
 
-        window.downloadTemplate = () => { alert("Pastikan script library Sheet.js terbaca dengan sempurna."); };
+        window.downloadTemplate = () => { window.showCustomAlert("Informasi", "Pastikan script library Sheet.js terbaca dengan sempurna.", "fa-file-excel", "text-green-500", "bg-green-100"); };
         window.importSiswa = (event) => { /* Logika sheet import */ };
 
         window.populateKategoriDropdown = () => {
@@ -1014,7 +1054,10 @@
             const kelas = document.getElementById('input-kelas').value;
             const kat = document.getElementById('input-kategori').value;
             const item = document.getElementById('input-item').value;
-            if(kat !== "Sumatif Lingkup Materi" && kat !== "Ujian") return alert("Hanya untuk Sumatif Lingkup Materi & Ujian.");
+            if(kat !== "Sumatif Lingkup Materi" && kat !== "Ujian") {
+                window.showCustomAlert('Perhatian', 'Katrol hanya untuk Sumatif Lingkup Materi & Ujian.');
+                return;
+            }
             
             let stds = window.appData.students.filter(s => s.kelas === kelas);
             if(stds.length === 0) return;
@@ -1128,8 +1171,17 @@
         // 6. LOGIKA CETAK PDF PROFESIONAL
         // ==========================================
         window.cetakPDF = async () => {
+            // Blokir fitur cetak untuk mode demo
+            if (isDemoMode) {
+                window.showCustomAlert('Akses Dibatasi', 'Fitur Cetak PDF tidak diperkenankan dalam Mode Demo.', 'fa-lock', 'text-red-500', 'bg-red-100');
+                return;
+            }
+
             const kelas = document.getElementById('rekap-kelas').value;
-            if(!kelas) return alert('Tidak ada kelas untuk dicetak.');
+            if(!kelas) {
+                window.showCustomAlert('Perhatian', 'Tidak ada kelas untuk dicetak.');
+                return;
+            }
             
             showLoading(true, 'Menyiapkan Dokumen PDF...');
 
