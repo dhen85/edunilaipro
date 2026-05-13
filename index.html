@@ -354,6 +354,17 @@
                         </div>
                     </div>
 
+                    <!-- Form Identitas Guru Mata Pelajaran -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-6">
+                        <h2 class="font-semibold text-lg border-b border-slate-100 pb-2 text-slate-800"><i class="fa-solid fa-chalkboard-user text-brand-500 mr-2"></i>Identitas Guru & Pelajaran</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">Nama Guru</label><input type="text" id="set-guru-nama" class="w-full border-slate-300 border rounded-lg shadow-sm py-2 px-3 focus:ring-brand-500 focus:border-brand-500 bg-slate-50" placeholder="Contoh: Siti Aminah, S.Pd."></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">NIP/NIP3K Guru</label><input type="text" id="set-guru-nip" class="w-full border-slate-300 border rounded-lg shadow-sm py-2 px-3 focus:ring-brand-500 focus:border-brand-500 bg-slate-50" placeholder="Contoh: 19850202 201001 2 003"></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">Mata Pelajaran</label><input type="text" id="set-guru-mapel" class="w-full border-slate-300 border rounded-lg shadow-sm py-2 px-3 focus:ring-brand-500 focus:border-brand-500 bg-slate-50" placeholder="Contoh: Matematika"></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">Tahun Pelajaran</label><input type="text" id="set-guru-tapel" class="w-full border-slate-300 border rounded-lg shadow-sm py-2 px-3 focus:ring-brand-500 focus:border-brand-500 bg-slate-50" placeholder="Contoh: 2025/2026"></div>
+                        </div>
+                    </div>
+
                     <!-- Form Parameter Katrol yang sudah ada -->
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-6">
                         <h2 class="font-semibold text-lg border-b border-slate-100 pb-2 text-slate-800"><i class="fa-solid fa-sliders text-brand-500 mr-2"></i>Parameter Katrol Linier</h2>
@@ -434,6 +445,12 @@
                     alamat: "Jl. Kelimutu, Kel. Onekore, Kec. Ende Tengah, Kab. Ende",
                     kepsek: "Marcelinus Ricardus Rango, S.Pd.",
                     nip: "19680707 200502 1 003"
+                },
+                guru: {
+                    nama: "DANAR WULAN, S.Si.",
+                    nip: "19850815 201708 1 001",
+                    mapel: "ILMU PENGETAHUAN ALAM",
+                    tapel: "2025/2026"
                 }
             },
             kategori: {
@@ -453,6 +470,7 @@
         // Fungsi Global untuk Mengupdate Identitas di semua layar (Login, Header, dll)
         window.updateIdentitasUI = () => {
             const sek = window.appData?.settings?.sekolah || defaultAppData.settings.sekolah;
+            const guru = window.appData?.settings?.guru || defaultAppData.settings.guru;
             const namaSekolah = sek.nama || "SEKOLAH PENGGERAK INDONESIA";
             
             const headerEl = document.getElementById('header-school-name');
@@ -469,6 +487,11 @@
                 document.getElementById('set-sek-alamat').value = sek.alamat;
                 document.getElementById('set-sek-kepsek').value = sek.kepsek;
                 document.getElementById('set-sek-nip').value = sek.nip;
+                
+                document.getElementById('set-guru-nama').value = guru.nama;
+                document.getElementById('set-guru-nip').value = guru.nip;
+                document.getElementById('set-guru-mapel').value = guru.mapel;
+                document.getElementById('set-guru-tapel').value = guru.tapel;
             }
         };
 
@@ -599,6 +622,9 @@
                     // Backward compatibility (Jika user lama belum punya objek "sekolah")
                     if(!window.appData.settings.sekolah) {
                         window.appData.settings.sekolah = defaultAppData.settings.sekolah;
+                    }
+                    if(!window.appData.settings.guru) {
+                        window.appData.settings.guru = defaultAppData.settings.guru;
                     }
                 } else {
                     // Jika user baru, buat kerangka data baru dari default
@@ -915,6 +941,14 @@
                 kepsek: document.getElementById('set-sek-kepsek').value.trim(),
                 nip: document.getElementById('set-sek-nip').value.trim()
             };
+
+            // Identitas Guru
+            window.appData.settings.guru = {
+                nama: document.getElementById('set-guru-nama').value.trim(),
+                nip: document.getElementById('set-guru-nip').value.trim(),
+                mapel: document.getElementById('set-guru-mapel').value.trim(),
+                tapel: document.getElementById('set-guru-tapel').value.trim()
+            };
             
             window.updateIdentitasUI(); // Update DOM saat tersimpan
             await window.saveToCloud();
@@ -994,6 +1028,7 @@
 
             // Ambil data Identitas Sekolah dari pengaturan (atau defaults)
             const sek = window.appData.settings.sekolah || defaultAppData.settings.sekolah;
+            const guru = window.appData.settings.guru || defaultAppData.settings.guru;
 
             // 1. Ambil HTML dari tabel rekap
             const theadHTML = document.getElementById('rekap-table-head').innerHTML;
@@ -1011,7 +1046,7 @@
             // 3. Bangun Struktur HTML khusus cetak dengan Kop Resmi dan Data Dinamis Identitas
             container.innerHTML = `
                 <div style="text-align: center; margin-bottom: 20px;">
-                    <h2 style="margin: 0; font-size: 16px; font-weight: bold; text-transform: uppercase;">Kementerian Pendidikan, Kebudayaan, Riset, dan Teknologi</h2>
+                    <h2 style="margin: 0; font-size: 16px; font-weight: bold; text-transform: uppercase;">DINAS PENDIDIKAN PEMUDA DAN OLAHRAGA</h2>
                     <h1 style="margin: 5px 0; font-size: 20px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;">${sek.nama}</h1>
                     <p style="margin: 0; font-size: 12px;">${sek.alamat}</p>
                     <div style="border-top: 3px solid #000; margin-top: 10px;"></div>
@@ -1024,15 +1059,15 @@
                     <table style="width: 100%; border: none;">
                         <tr>
                             <td style="width: 120px; font-weight: bold; padding-bottom: 5px;">Mata Pelajaran</td>
-                            <td style="padding-bottom: 5px;">: ...........................................</td>
+                            <td style="padding-bottom: 5px;">: ${guru.mapel}</td>
                             <td style="width: 100px; font-weight: bold; padding-bottom: 5px; text-align: right;">Kelas</td>
                             <td style="width: 120px; padding-bottom: 5px; text-align: left; padding-left: 10px;">: <strong>${kelas}</strong></td>
                         </tr>
                         <tr>
                             <td style="font-weight: bold;">Guru Mata Pelajaran</td>
-                            <td>: ...........................................</td>
+                            <td>: ${guru.nama}</td>
                             <td style="font-weight: bold; text-align: right;">Tahun Pelajaran</td>
-                            <td style="text-align: left; padding-left: 10px;">: 2025/2026</td>
+                            <td style="text-align: left; padding-left: 10px;">: ${guru.tapel}</td>
                         </tr>
                     </table>
                 </div>
@@ -1046,11 +1081,16 @@
                     </tbody>
                 </table>
                 
-                <div style="margin-top: 40px; font-size: 11px; display: flex; justify-content: flex-end; font-family: Arial, sans-serif;">
+                <div style="margin-top: 40px; font-size: 11px; display: flex; justify-content: space-between; font-family: Arial, sans-serif;">
                     <div style="text-align: center; width: 250px;">
                         <p style="margin: 0 0 60px 0;">Mengetahui,<br>Kepala Sekolah</p>
                         <p style="margin: 0; font-weight: bold; text-decoration: underline;">${sek.kepsek}</p>
                         <p style="margin: 0;">NIP. ${sek.nip}</p>
+                    </div>
+                    <div style="text-align: center; width: 250px;">
+                        <p style="margin: 0 0 60px 0;"><br>Guru Mata Pelajaran</p>
+                        <p style="margin: 0; font-weight: bold; text-decoration: underline;">${guru.nama}</p>
+                        <p style="margin: 0;">NIP. ${guru.nip}</p>
                     </div>
                 </div>
             `;
