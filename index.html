@@ -6,6 +6,7 @@
     <title>Sistem Katrol & Pengelola Nilai Otomatis</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" xintegrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -68,6 +69,10 @@
                      </div>
                      <h2 class="text-3xl font-bold text-brand-700 drop-shadow-sm opacity-90">Selamat Datang di</h2>
                      <h1 class="text-5xl font-extrabold text-slate-800 mt-2 tracking-tight">Edu<span class="text-brand-600">Nilai</span> Pro</h1>
+                     <!-- ID Sekolah di Login -->
+                     <div class="mt-4 px-6 py-2 bg-white/60 backdrop-blur rounded-full border border-brand-200 shadow-sm max-w-[80%]">
+                         <p id="login-school-name" class="text-sm font-bold text-brand-800 text-center uppercase tracking-wider truncate">SEKOLAH PENGGERAK INDONESIA</p>
+                     </div>
                 </div>
             </div>
             <div class="w-full md:w-1/2 p-4 md:p-6 flex items-center justify-center z-20 relative">
@@ -109,6 +114,10 @@
                      </div>
                      <h2 class="text-3xl font-bold text-brand-800 drop-shadow-sm mb-2">Daftar Gratis!</h2>
                      <p class="text-slate-600 font-medium leading-relaxed">Buat akun untuk mulai mengelola nilai siswa Anda secara otomatis dengan sistem Katrol interpolasi linear di penyimpanan awan.</p>
+                     <!-- ID Sekolah di Signup -->
+                     <div class="mt-6 px-6 py-2 bg-white/60 backdrop-blur rounded-full border border-brand-200 shadow-sm max-w-[80%]">
+                         <p id="signup-school-name" class="text-sm font-bold text-brand-800 text-center uppercase tracking-wider truncate">SEKOLAH PENGGERAK INDONESIA</p>
+                     </div>
                 </div>
             </div>
             <div class="w-full md:w-1/2 p-4 md:p-6 flex items-center justify-center z-20 relative">
@@ -145,9 +154,13 @@
         <header class="bg-white shadow-sm border-b border-slate-200 h-16 flex items-center px-6 shrink-0 z-30 relative">
             <div class="flex items-center">
                 <i class="fa-solid fa-graduation-cap text-brand-500 text-2xl mr-3"></i>
-                <span class="font-bold text-xl text-slate-900">Edu<span class="text-brand-500">Nilai</span> Pro</span>
+                <!-- Subtext Nama Sekolah di Header -->
+                <div class="flex flex-col">
+                    <span class="font-bold text-xl text-slate-900 leading-tight">Edu<span class="text-brand-500">Nilai</span> Pro</span>
+                    <span id="header-school-name" class="text-[11px] text-slate-500 font-medium tracking-wide uppercase truncate max-w-[200px] sm:max-w-[300px]">SEKOLAH PENGGERAK INDONESIA</span>
+                </div>
             </div>
-            <div class="hidden md:flex ml-4 pl-4 border-l border-slate-200 items-center">
+            <div class="hidden md:flex ml-auto pl-4 border-l border-slate-200 items-center mr-4">
                 <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider"><i class="fa-solid fa-cloud mr-1"></i> Cloud Sync Aktif</span>
             </div>
             <button class="md:hidden ml-auto text-slate-500 hover:text-brand-600" onclick="document.getElementById('sidebar').classList.toggle('hidden')">
@@ -311,7 +324,7 @@
                         <h1 class="text-2xl font-bold text-slate-800">Rekapitulasi Daftar Nilai Lengkap</h1>
                         <div class="flex space-x-3 items-center">
                             <select id="rekap-kelas" onchange="renderRekap()" class="border-slate-300 rounded-lg py-2 px-3 text-sm focus:ring-brand-500 focus:border-brand-500 border shadow-sm"></select>
-                            <button onclick="alert('Untuk ekstrak PDF/Excel, tekan CTRL+P untuk cetak layar tabel ini.')" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap"><i class="fa-solid fa-print mr-2"></i>Cetak</button>
+                            <button onclick="cetakPDF()" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap"><i class="fa-solid fa-file-pdf mr-2"></i>Cetak PDF</button>
                         </div>
                     </div>
                     <div class="bg-white p-3 rounded-lg text-xs text-slate-600 border border-slate-200 shadow-sm flex items-center gap-4 overflow-x-auto">
@@ -328,10 +341,24 @@
                 </div>
 
                 <div id="view-settings" class="hidden fade-in space-y-6 max-w-2xl flex-grow">
-                    <h1 class="text-2xl font-bold text-slate-800">Pengaturan Parameter Penilaian</h1>
+                    <h1 class="text-2xl font-bold text-slate-800">Pengaturan Parameter & Identitas</h1>
+                    
+                    <!-- Form Identitas Sekolah Baru -->
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-6">
+                        <h2 class="font-semibold text-lg border-b border-slate-100 pb-2 text-slate-800"><i class="fa-solid fa-school text-brand-500 mr-2"></i>Identitas Sekolah</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">Nama Sekolah</label><input type="text" id="set-sek-nama" class="w-full border-slate-300 border rounded-lg shadow-sm py-2 px-3 focus:ring-brand-500 focus:border-brand-500 bg-slate-50" placeholder="Contoh: SMP NEGERI 1 MERDEKA"></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">Alamat Lengkap</label><input type="text" id="set-sek-alamat" class="w-full border-slate-300 border rounded-lg shadow-sm py-2 px-3 focus:ring-brand-500 focus:border-brand-500 bg-slate-50" placeholder="Contoh: Jl. Pendidikan No. 123"></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">Nama Kepala Sekolah</label><input type="text" id="set-sek-kepsek" class="w-full border-slate-300 border rounded-lg shadow-sm py-2 px-3 focus:ring-brand-500 focus:border-brand-500 bg-slate-50" placeholder="Contoh: Budi Santoso, M.Pd."></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">NIP Kepala Sekolah</label><input type="text" id="set-sek-nip" class="w-full border-slate-300 border rounded-lg shadow-sm py-2 px-3 focus:ring-brand-500 focus:border-brand-500 bg-slate-50" placeholder="Contoh: 19800101 200501 1 001"></div>
+                        </div>
+                    </div>
+
+                    <!-- Form Parameter Katrol yang sudah ada -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-6">
+                        <h2 class="font-semibold text-lg border-b border-slate-100 pb-2 text-slate-800"><i class="fa-solid fa-sliders text-brand-500 mr-2"></i>Parameter Katrol Linier</h2>
                         <div class="p-4 bg-brand-50 text-brand-900 rounded-lg border border-brand-200 text-sm">
-                            <i class="fa-solid fa-circle-info mr-2"></i> Pengaturan KKM dan Target Katrol digunakan saat Anda menekan tombol "Terapkan Katrol". Katrol menggunakan sistem Interpolasi Linier.
+                            <i class="fa-solid fa-circle-info mr-2"></i> Pengaturan KKM dan Target Katrol digunakan saat Anda menekan tombol "Terapkan Katrol".
                         </div>
                         <div class="grid grid-cols-1 gap-6">
                             <div><label class="block text-sm font-semibold text-slate-700 mb-1">KKM (Kriteria Ketuntasan Minimal)</label><input type="number" id="set-kkm" class="w-full border-slate-300 border rounded-lg shadow-sm py-2 px-3 focus:ring-brand-500 focus:border-brand-500 bg-slate-50"></div>
@@ -400,7 +427,15 @@
         // 2. STATE DEFAULT APLIKASI
         // ==========================================
         const defaultAppData = {
-            settings: { kkm: 75, targetMin: 76, targetMax: 95, predikat: { A: 90, B: 80, C: 70 } },
+            settings: { 
+                kkm: 75, targetMin: 76, targetMax: 95, predikat: { A: 90, B: 80, C: 70 },
+                sekolah: {
+                    nama: "SMP NEGERI 2 ENDE",
+                    alamat: "Jl. Kelimutu, Kel. Onekore, Kec. Ende Tengah, Kab. Ende",
+                    kepsek: "Marcelinus Ricardus Rango, S.Pd.",
+                    nip: "19680707 200502 1 003"
+                }
+            },
             kategori: {
                 "Sikap": ["Sikap & Perilaku"],
                 "Formatif": ["Keaktifan", "Partisipasi", "Tugas 1", "Tugas 2"],
@@ -412,8 +447,33 @@
             grades: {} 
         };
 
-        // Di-expose ke window agar bisa diakses HTML onclick
-        window.appData = {}; 
+        // Di-expose ke window agar bisa diakses HTML onclick dan diisi dengan kerangka awal
+        window.appData = JSON.parse(JSON.stringify(defaultAppData)); 
+
+        // Fungsi Global untuk Mengupdate Identitas di semua layar (Login, Header, dll)
+        window.updateIdentitasUI = () => {
+            const sek = window.appData?.settings?.sekolah || defaultAppData.settings.sekolah;
+            const namaSekolah = sek.nama || "SEKOLAH PENGGERAK INDONESIA";
+            
+            const headerEl = document.getElementById('header-school-name');
+            const loginEl = document.getElementById('login-school-name');
+            const signupEl = document.getElementById('signup-school-name');
+            
+            if(headerEl) headerEl.innerText = namaSekolah;
+            if(loginEl) loginEl.innerText = namaSekolah;
+            if(signupEl) signupEl.innerText = namaSekolah;
+            
+            // Set fields di menu Pengaturan
+            if(document.getElementById('set-sek-nama')) {
+                document.getElementById('set-sek-nama').value = sek.nama;
+                document.getElementById('set-sek-alamat').value = sek.alamat;
+                document.getElementById('set-sek-kepsek').value = sek.kepsek;
+                document.getElementById('set-sek-nip').value = sek.nip;
+            }
+        };
+
+        // Langsung panggil saat file dimuat agar tampilan default login merespon
+        window.updateIdentitasUI();
 
         // ==========================================
         // 3. LOGIKA AUTENTIKASI (LOGIN & SIGNUP)
@@ -498,6 +558,10 @@
                 window.showToast('Berhasil masuk ke EduNilai Pro!');
             } else {
                 currentUser = null;
+                // Saat logout kembalikan setting sementara ke default agar aman
+                window.appData = JSON.parse(JSON.stringify(defaultAppData));
+                window.updateIdentitasUI();
+
                 document.getElementById('app-container').classList.add('hidden');
                 document.getElementById('app-container').classList.remove('flex');
                 document.getElementById('view-login').style.display = 'flex';
@@ -532,20 +596,25 @@
                 
                 if (docSnap.exists()) {
                     window.appData = docSnap.data();
+                    // Backward compatibility (Jika user lama belum punya objek "sekolah")
+                    if(!window.appData.settings.sekolah) {
+                        window.appData.settings.sekolah = defaultAppData.settings.sekolah;
+                    }
                 } else {
                     // Jika user baru, buat kerangka data baru dari default
                     window.appData = JSON.parse(JSON.stringify(defaultAppData));
-                    await saveToCloud();
+                    await saveToCloud(true);
                 }
 
-                // Terapkan UI Settings
+                // Terapkan UI Settings & Identitas
                 document.getElementById('set-kkm').value = window.appData.settings.kkm;
                 document.getElementById('set-min').value = window.appData.settings.targetMin;
                 document.getElementById('set-max').value = window.appData.settings.targetMax;
                 document.getElementById('set-pred-a').value = window.appData.settings.predikat.A;
                 document.getElementById('set-pred-b').value = window.appData.settings.predikat.B;
                 document.getElementById('set-pred-c').value = window.appData.settings.predikat.C;
-
+                
+                window.updateIdentitasUI();
                 window.populateClassDropdowns();
                 window.populateKategoriDropdown();
             } catch (e) {
@@ -834,9 +903,20 @@
 
         window.simpanNilai = async () => { await window.saveToCloud(); };
         window.simpanPengaturan = async () => {
+            // Parameter Katrol
             window.appData.settings.kkm = parseFloat(document.getElementById('set-kkm').value)||0;
             window.appData.settings.targetMin = parseFloat(document.getElementById('set-min').value)||0;
             window.appData.settings.targetMax = parseFloat(document.getElementById('set-max').value)||0;
+            
+            // Identitas Sekolah
+            window.appData.settings.sekolah = {
+                nama: document.getElementById('set-sek-nama').value.trim(),
+                alamat: document.getElementById('set-sek-alamat').value.trim(),
+                kepsek: document.getElementById('set-sek-kepsek').value.trim(),
+                nip: document.getElementById('set-sek-nip').value.trim()
+            };
+            
+            window.updateIdentitasUI(); // Update DOM saat tersimpan
             await window.saveToCloud();
         };
 
@@ -902,6 +982,114 @@
         }
 
         window.renderDashboard = () => { /* Logika Chart sama */ };
+
+        // ==========================================
+        // 6. LOGIKA CETAK PDF PROFESIONAL
+        // ==========================================
+        window.cetakPDF = async () => {
+            const kelas = document.getElementById('rekap-kelas').value;
+            if(!kelas) return alert('Tidak ada kelas untuk dicetak.');
+            
+            showLoading(true, 'Menyiapkan Dokumen PDF...');
+
+            // Ambil data Identitas Sekolah dari pengaturan (atau defaults)
+            const sek = window.appData.settings.sekolah || defaultAppData.settings.sekolah;
+
+            // 1. Ambil HTML dari tabel rekap
+            const theadHTML = document.getElementById('rekap-table-head').innerHTML;
+            const tbodyHTML = document.getElementById('rekap-table-body').innerHTML;
+
+            // 2. Bersihkan styling Tailwind yang mengganggu format cetak hitam putih
+            const cleanThead = theadHTML.replace(/class="[^"]*"/g, '');
+            const cleanTbody = tbodyHTML.replace(/class="[^"]*"/g, '');
+
+            const container = document.createElement('div');
+            container.style.padding = '20px 30px';
+            container.style.fontFamily = '"Times New Roman", Times, serif';
+            container.style.color = '#000';
+            
+            // 3. Bangun Struktur HTML khusus cetak dengan Kop Resmi dan Data Dinamis Identitas
+            container.innerHTML = `
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h2 style="margin: 0; font-size: 16px; font-weight: bold; text-transform: uppercase;">Kementerian Pendidikan, Kebudayaan, Riset, dan Teknologi</h2>
+                    <h1 style="margin: 5px 0; font-size: 20px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;">${sek.nama}</h1>
+                    <p style="margin: 0; font-size: 12px;">${sek.alamat}</p>
+                    <div style="border-top: 3px solid #000; margin-top: 10px;"></div>
+                    <div style="border-top: 1px solid #000; margin-top: 2px; margin-bottom: 20px;"></div>
+                    
+                    <h3 style="margin: 0; font-size: 14px; font-weight: bold; text-decoration: underline;">REKAPITULASI NILAI AKHIR SISWA</h3>
+                </div>
+                
+                <div style="margin-bottom: 15px; font-size: 11px; font-family: Arial, sans-serif;">
+                    <table style="width: 100%; border: none;">
+                        <tr>
+                            <td style="width: 120px; font-weight: bold; padding-bottom: 5px;">Mata Pelajaran</td>
+                            <td style="padding-bottom: 5px;">: ...........................................</td>
+                            <td style="width: 100px; font-weight: bold; padding-bottom: 5px; text-align: right;">Kelas</td>
+                            <td style="width: 120px; padding-bottom: 5px; text-align: left; padding-left: 10px;">: <strong>${kelas}</strong></td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: bold;">Guru Mata Pelajaran</td>
+                            <td>: ...........................................</td>
+                            <td style="font-weight: bold; text-align: right;">Tahun Pelajaran</td>
+                            <td style="text-align: left; padding-left: 10px;">: 2025/2026</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <table id="pdf-table" style="width: 100%; border-collapse: collapse; font-size: 9px; font-family: Arial, sans-serif;" border="1">
+                    <thead style="background-color: #e5e7eb; text-align: center; font-weight: bold;">
+                        ${cleanThead}
+                    </thead>
+                    <tbody style="text-align: center;">
+                        ${cleanTbody}
+                    </tbody>
+                </table>
+                
+                <div style="margin-top: 40px; font-size: 11px; display: flex; justify-content: flex-end; font-family: Arial, sans-serif;">
+                    <div style="text-align: center; width: 250px;">
+                        <p style="margin: 0 0 60px 0;">Mengetahui,<br>Kepala Sekolah</p>
+                        <p style="margin: 0; font-weight: bold; text-decoration: underline;">${sek.kepsek}</p>
+                        <p style="margin: 0;">NIP. ${sek.nip}</p>
+                    </div>
+                </div>
+            `;
+
+            // 4. Pastikan border tabel tergambar jelas dan rata kiri untuk kolom Nama
+            const cells = container.querySelectorAll('#pdf-table th, #pdf-table td');
+            cells.forEach(cell => {
+                cell.style.border = '1px solid black';
+                cell.style.padding = '4px';
+            });
+            
+            const trList = container.querySelectorAll('#pdf-table tbody tr');
+            trList.forEach(tr => {
+                if(tr.children[1]) {
+                    tr.children[1].style.textAlign = 'left';
+                    tr.children[1].style.paddingLeft = '8px';
+                }
+            });
+
+            // 5. Opsi konversi PDF (A4 - Landscape)
+            const opt = {
+                margin:       10,
+                filename:     'Rekap_Nilai_' + kelas.replace(/ /g, '_') + '.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 }, // kualitas ketajaman cetak
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+            };
+
+            // 6. Eksekusi PDF Download
+            try {
+                await html2pdf().set(opt).from(container).save();
+                window.showToast('File PDF berhasil disimpan!');
+            } catch(e) {
+                console.error(e);
+                alert('Terjadi kesalahan saat memproses PDF.');
+            }
+            
+            showLoading(false);
+        };
     </script>
 </body>
 </html>
